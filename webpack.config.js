@@ -13,7 +13,8 @@ module.exports = {
     },
     devServer: {
         port: 3000,
-        open: true
+        open: true,
+        clientLogLevel: 'silent',
     },
     plugins: [
         new HTMLWebpackPlugin({

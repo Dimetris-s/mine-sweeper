@@ -8,4 +8,7 @@ const game = new Game({
     rows: 10,
     columns: 10
 })
-console.log(game);
+
+window.game = game
+
+console.log(game.playfield);
