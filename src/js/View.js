@@ -110,8 +110,7 @@ export default class View {
                         this.renderCell(this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize, playfield[y][x], true, View.colors[playfield[y][x]])
                     }
                 } else {
-                    ! this.renderCell(this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize)
-                    // this.renderCell(this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize, playfield[y][x], true, View.colors[playfield[y][x]])
+                     this.renderCell(this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize)
                 }
             }
         }
