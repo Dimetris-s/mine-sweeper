@@ -1,0 +1,28 @@
+.gamebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    min-height: 50px;
+    padding: 0.8rem 1.5rem;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px 1px #000;
+    display: flex;
+    column-gap: 1rem;
+    
+    .btn {
+        background-color: transparent;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+        outline: none;
+        &:hover:not(.active) {
+            background-color: rgb(182, 220, 255);
+        }
+        &.active {
+            background-color: rgb(0, 132, 255);
+            color: white;
+        }
+    }
+}
+
