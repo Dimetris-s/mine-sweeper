@@ -94,92 +94,86 @@ export default class View {
         this.smileImg.onload = () => {
             this.ctx.drawImage(this.smileImg, this.smileImgX, this.smileImgY, this.smileImgSize, this.smileImgSize)
         }
-
-
     }
 
-    renderFinalScreen({playfield, gameOver}) {
-        switch(gameOver) {
+    setDefaultSmile() {
+        this.smileImg.src = smileURL
+        this.smileImg.onload = () => {
+            this.ctx.drawImage(this.smileImg, this.smileImgX, this.smileImgY, this.smileImgSize, this.smileImgSize)
+        }
+    }
+
+    renderWinnerScreen(playfield) {
+        this.smileImg.src = smileWURL
+        this.smileImg.onload = () => {
+            this.ctx.drawImage(this.smileImg, this.smileImgX, this.smileImgY, this.smileImgSize, this.smileImgSize)
+        }
+        for (let y = 0; y < playfield.length; y++) {
+            for (let x = 0; x < playfield[y].length; x++) {
+                if(playfield[y][x].mine) {
+                    this.renderCell(
+                        this.cellSize * x,
+                        this.cellSize * y + this.playfieldY, 
+                        this.cellSize, 
+                        this.cellSize,
+                        playfield[y][x]
+                        )
+                    this.drawImage(
+                        this.bombImg,
+                        x * this.cellSize,
+                        y * this.cellSize + this.playfieldY,
+                        this.cellSize,
+                        this.cellSize
+                        )
+                }
+            }
+        }
+    }
+
+    renderLooserScreen(playfield) {
+        this.smileImg.src = smileLURL
+        this.smileImg.onload = () => {
+            this.ctx.drawImage(this.smileImg, this.smileImgX, this.smileImgY, this.smileImgSize, this.smileImgSize)
+        }
+        for (let y = 0; y < playfield.length; y++) {
+            for (let x = 0; x < playfield[y].length; x++) {
+                this.renderCell(
+                    this.cellSize * x,
+                    this.cellSize * y + this.playfieldY, 
+                    this.cellSize, 
+                    this.cellSize,
+                    playfield[y][x]
+                    )
+                if(playfield[y][x].opened && playfield[y][x].mine) {
+                    this.drawImage(
+                        this.explosionImg, 
+                        this.cellSize * x, 
+                        this.cellSize * y + this.playfieldY, 
+                        this.cellSize, 
+                        this.cellSize
+                    )
+                }
+                if(!playfield[y][x].opened && playfield[y][x].mine) {
+                    this.drawImage(
+                        this.bombImg,
+                        x * this.cellSize,
+                        y * this.cellSize + this.playfieldY,
+                        this.cellSize,
+                        this.cellSize
+                        )
+                }
+            }
+        }
+    }
+
+    renderFinalScreen(state) {
+        switch(state.gameOver) {
             case 'win':
-                this.smileImg.src = smileWURL
-                this.smileImg.onload = () => {
-                    this.ctx.drawImage(this.smileImg, this.smileImgX, this.smileImgY, this.smileImgSize, this.smileImgSize)
-                }
-                for (let y = 0; y < playfield.length; y++) {
-                    for (let x = 0; x < playfield[y].length; x++) {
-                        if(playfield[y][x] === 9) {
-                            this.renderCell(
-                                x * this.cellSize,
-                                y * this.cellSize + this.playfieldY,
-                                this.cellSize,
-                                this.cellSize,
-                                null,
-                                false,
-                                null
-                            )
-                            this.drawImage(
-                                this.bombImg,
-                                x * this.cellSize,
-                                y * this.cellSize + this.playfieldY,
-                                this.cellSize,
-                                this.cellSize
-                                )
-                        }
-                    }
-                }
+                this.renderWinnerScreen(state.playfield)
                 break
-
-
-
             case 'lose':
-                this.smileImg.src = smileLURL
-                this.smileImg.onload = () => {
-                    this.ctx.drawImage(this.smileImg, this.smileImgX, this.smileImgY, this.smileImgSize, this.smileImgSize)
-                }
-                for (let y = 0; y < playfield.length; y++) {
-                    for (let x = 0; x < playfield[y].length; x++) {
-                        if(playfield[y][x] != 9) {
-                            this.renderCell(
-                                this.cellSize * x, 
-                                this.cellSize * y + this.playfieldY, 
-                                this.cellSize, 
-                                this.cellSize, 
-                                playfield[y][x], 
-                                true, 
-                                View.colors[playfield[y][x]]
-                            )
-                        }
-                        if(playfield[y][x] == 0) {
-                            this.renderCell(
-                                this.cellSize * x, 
-                                this.cellSize * y + this.playfieldY, 
-                                this.cellSize, 
-                                this.cellSize, 
-                                '', 
-                                true, 
-                                View.colors[playfield[y][x]]
-                            )
-                        }
-                        if(playfield[y][x] === 9) {
-                            this.renderCell(
-                                x * this.cellSize,
-                                y * this.cellSize + this.playfieldY,
-                                this.cellSize,
-                                this.cellSize,
-                                null,
-                                false,
-                                null
-                            )
-                            this.drawImage(
-                                this.bombImg,
-                                x * this.cellSize,
-                                y * this.cellSize + this.playfieldY,
-                                this.cellSize,
-                                this.cellSize
-                                )
-                        }
-                    }
-                }
+                this.renderLooserScreen(state.playfield)
+                break
         }
     }
 
@@ -208,35 +202,32 @@ export default class View {
         const playfield = state.playfield
         for (let y = 0; y < playfield.length; y++) {
             for (let x = 0; x < playfield[y].length; x++) {
-                if(typeof playfield[y][x] === 'string') {
-                    if(playfield[y][x] === '0' ) {
-                        this.renderCell(this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize, '', true)
-                    } else if(playfield[y][x] === '9') {
-                        this.renderCell(this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize, '', true)
-                        this.drawImage(this.explosionImg, this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize)
-                    } else {
-                        this.renderCell(this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize, playfield[y][x], true, View.colors[playfield[y][x]])
-                    }
-                } else {
-                     this.renderCell(this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize)
+                this.renderCell(
+                    this.cellSize * x,
+                    this.cellSize * y + this.playfieldY,
+                    this.cellSize,
+                    this.cellSize,
+                    playfield[y][x]
+                    )
+                if(playfield[y][x].flaged) {
+                    this.drawFlag(x, y)
                 }
             }
         }
-        
     }
 
-    renderCell(x, y, width, height, content = null, isOpen = false, color = 'red') {
-        this.ctx.fillStyle = isOpen ? '#ccc' : '#5d92ff'
+    renderCell(x, y, width, height, {minesAround, opened}) {
+        this.ctx.fillStyle = opened ? '#ccc' : '#5d92ff'
         this.ctx.strokeStyle = '#000'
         this.ctx.lineWidth = 0.25
         this.ctx.fillRect(x, y, width, height)
         this.ctx.strokeRect(x, y, width, height)
-        if(isOpen) {
+        if(opened) {
             this.ctx.textAlign = 'center'
             this.ctx.textBaseline = 'middle'
-            this.ctx.fillStyle = color
+            this.ctx.fillStyle = View.colors[minesAround]
             this.ctx.font = '20px bold'
-            this.ctx.fillText(content, x + width / 2, y + height / 2)
+            this.ctx.fillText(minesAround, x + width / 2, y + height / 2)
         }
     }
 

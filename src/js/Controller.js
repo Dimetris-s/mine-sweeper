@@ -7,7 +7,7 @@ export default class Controller {
         this.rootElement = element
         
         this.gamebar = new Gamebar(this.rootElement)
-        this.game = new Game({columns: 10, rows: 10, mines: 2})
+        this.game = new Game(2)
         this.view = new View(this.rootElement, {
             rows: this.game.rows,
             columns: this.game.columns,
@@ -33,6 +33,21 @@ export default class Controller {
         if(state.gameOver) {
             this.onGameOver()
         }
+    }
+    restartGame() {
+        this.stopTimer()
+        this.init()
+        this.update()
+        this.view.setDefaultSmile()
+    }
+
+    init() {
+        this.game = new Game(2)
+
+        this.intervalId = null
+        this.timerId = null
+        this.isPlaying = true
+        this.gameStarted = false
     }
         
     startGame(x,y) {
@@ -62,11 +77,16 @@ export default class Controller {
     onGameOver() {
         this.isPlaying = false
         this.stopTimer()
-        console.log(this.view);
         this.view.renderFinalScreen(this.game.getState())
     }
 
     clickHandler(e)  {
+        if(
+            (e.offsetX >= this.view.smileImgX && e.offsetX <= this.view.smileImgX + this.view.smileImgSize) &&
+            (e.offsetY >= this.view.smileImgY && e.offsetY <= this.view.smileImgY + this.view.smileImgSize) 
+          ) {
+              this.restartGame()
+          }
         if(this.isPlaying) {
             const x =  Math.floor(e.offsetX / this.view.cellSize)
             const y =  Math.floor((e.offsetY - this.view.panelHeight) / this.view.cellSize)
@@ -81,11 +101,11 @@ export default class Controller {
 
     contextHandler(e) {
         e.preventDefault()
-        if(this.isPlaying) {
+        if(this.isPlaying && this.gameStarted) {
             const x =  Math.floor(e.offsetX / this.view.cellSize)
             const y =  Math.floor((e.offsetY - this.view.panelHeight) / this.view.cellSize)
             if(y < 0) return
-            this.view.drawFlag(x, y)
+            this.game.toggleFlag(y, x)
         }
     }
 }

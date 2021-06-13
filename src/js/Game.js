@@ -30,11 +30,11 @@ export default class Game {
         for (let i = 0; i < this.mines; i++) {
             let y = rnd(0, this.rows - 1)
             let x = rnd(0, this.columns - 1)
-            while (this.playfield[y][x] === 9 || (px === x && py === y)) {
+            while (this.playfield[y][x].mine || (px === x && py === y)) {
                 y = rnd(0, this.rows - 1)
                 x = rnd(0, this.columns - 1)
             }
-            this.playfield[y][x] = 9
+            this.playfield[y][x].mine = true
         }
     }
 
@@ -45,7 +45,7 @@ export default class Game {
         }
         for (let i = 0; i < playfield.length; i++) {
             for (let j = 0; j < this.columns; j++) {
-                playfield[i][j] = 0
+                playfield[i][j] = {opened: false, mine: false, flaged: false, minesAround: 0}
             }
         }
 
@@ -55,7 +55,7 @@ export default class Game {
     getMinesAround(x, y, playfield) {
         let counter = 0
         this.getAvaliableCells(x, y, playfield).forEach(({x, y}) => {
-            if(playfield[y][x] === 9) counter++
+            if(playfield[y][x].mine) counter++
         })
         return counter
     }
@@ -76,38 +76,56 @@ export default class Game {
     fillPlayfield() {
         for (let y = 0; y < this.playfield.length; y++) {
             for (let x = 0; x < this.playfield[y].length; x++) {
-                if(this.playfield[y][x] !== 9) {
-                    this.playfield[y][x] = this.getMinesAround(x, y, this.playfield)
+                if(!this.playfield[y][x].mine) {
+                    this.playfield[y][x].minesAround = this.getMinesAround(x, y, this.playfield)
                 }
             }
         }
     }
 
     openCell(y, x) {
-        if(typeof this.playfield[y][x] === 'string') return
-        if(this.playfield[y][x] === 0) {
+        if(this.playfield[y][x].opened || this.playfield[y][x].flaged) return
+        if(this.playfield[y][x].minesAround === 0) {
             this.getAvaliableCells(x, y, this.playfield).forEach(({x, y}) => {
                 setTimeout(() => {
                     this.openCell(y, x)
                 }, 0)
             })
         }
-        if(this.playfield[y][x] === 9) {
+        if(this.playfield[y][x].mine) {
             this.isGameOver = 'lose'
+            for (let y = 0; y < this.playfield.length; y++) {
+                for (let x = 0; x < this.playfield[y].length; x++) {
+                    if(!this.playfield[y][x].mine) {
+                        this.playfield[y][x].opened = true
+                        this.playfield[y][x].flaged = false
+                    }
+                }
+            }
         }
-        this.playfield[y][x] = this.playfield[y][x].toString()
+        this.playfield[y][x].opened = true
 
-        if(this.checkWinnning()) {
-            this.isGameOver = 'win'
-        }
+        if(this.checkWinnning() && this.isGameOver !== 'lose') this.isGameOver = 'win'
+            
         
+    }
+    toggleFlag(y,x) {
+        if(this.playfield[y][x].opened) return
+
+        if(this.playfield[y][x].flaged) {
+            this.playfield[y][x].flaged = false
+            this.minesLeft++
+        } else {
+            this.playfield[y][x].flaged = true
+            this.minesLeft--
+        }
     }
 
     checkWinnning() {
         let win = true
         for (let y = 0; y < this.playfield.length; y++) {
             for (let x = 0; x < this.playfield[y].length; x++) {
-                if(typeof this.playfield[y][x] === 'number' && this.playfield[y][x] !== 9) {
+                if(!this.playfield[y][x].opened && !this.playfield[y][x].mine) {
                     win = false
                 }
             }
