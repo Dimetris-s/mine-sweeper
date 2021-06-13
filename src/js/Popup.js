@@ -31,7 +31,7 @@ export default class Popup {
                     </div>
                     <div class="form__item">
                         <label for="mines" class="input__label">Мины:</label>
-                        <input type="number" min="1" value="10" name="mines" id="mines" class="popup__input">
+                        <input type="number" max="999" min="1" value="10" name="mines" id="mines" class="popup__input">
                     </div>
                     <div class="form__actions">
                         <button  class="btn--ok btn form__btn">OK</button>

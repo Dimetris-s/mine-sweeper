@@ -12,6 +12,7 @@ export default class Game {
     
 
     isGameOver = null
+    gameTime = 0
     
     constructor(difficult) {
         this.difficult = typeof difficult === 'number' ? Game.difficults[difficult] : difficult
@@ -93,13 +94,11 @@ export default class Game {
         }
         if(this.playfield[y][x] === 9) {
             this.isGameOver = 'lose'
-            console.log('looser');
         }
         this.playfield[y][x] = this.playfield[y][x].toString()
 
         if(this.checkWinnning()) {
             this.isGameOver = 'win'
-            console.log('winner');
         }
         
     }
@@ -120,7 +119,8 @@ export default class Game {
         return {
             gameOver: this.isGameOver,
             playfield: this.playfield,
-            mines: this.minesLeft
+            mines: this.minesLeft,
+            time: this.gameTime
         }
     }
 }

@@ -16,32 +16,77 @@ export default class Controller {
         })
 
         this.intervalId = null
-        this.isPlaying = false
+        this.timerId = null
+        this.isPlaying = true
+        this.gameStarted = false
 
         this.view.canv.addEventListener('click', this.clickHandler.bind(this))
-        setInterval(() => {
-            this.view.renderCells(this.game.getState())
-        })
+        this.view.canv.addEventListener('contextmenu', this.contextHandler.bind(this))
     }
 
+    update() {
+        const state = this.game.getState()
+
+        this.view.renderTimeAndMinesPanels(state)
+        this.view.renderCells(state)
+
+        if(state.gameOver) {
+            this.onGameOver()
+        }
+    }
         
     startGame(x,y) {
         this.game.setMines(x,y)
         this.game.fillPlayfield()
-        this.isPlaying = true
+        this.gameStarted = true
+        this.startTimer()
         this.game.openCell(y,x)
     }
 
+    startTimer() {
+        this.intervalId = setInterval(() => {this.update()}, 0)
+        this.timerId = setInterval(() => {
+            if(this.game.gameTime === 999) {
+                clearInterval(this.timerId)
+                return
+            }
+            this.game.gameTime++
+        }, 1000)
+    }
+
+    stopTimer() {
+        clearInterval(this.timerId)
+        clearInterval(this.intervalId)
+    }
+
+    onGameOver() {
+        this.isPlaying = false
+        this.stopTimer()
+        console.log(this.view);
+        this.view.renderFinalScreen(this.game.getState())
+    }
 
     clickHandler(e)  {
-        const x =  Math.floor(e.offsetX / this.view.cellSize)
-        const y =  Math.floor((e.offsetY - this.view.panelHeight) / this.view.cellSize)
-        if(y < 0) return
-        if(!this.isPlaying) {
-            this.startGame(x,y)
-            return
+        if(this.isPlaying) {
+            const x =  Math.floor(e.offsetX / this.view.cellSize)
+            const y =  Math.floor((e.offsetY - this.view.panelHeight) / this.view.cellSize)
+            if(y < 0) return
+            if(!this.gameStarted) {
+                this.startGame(x,y)
+                return
+            }
+            this.game.openCell(y, x)
         }
-        this.game.openCell(y, x)
+    }
+
+    contextHandler(e) {
+        e.preventDefault()
+        if(this.isPlaying) {
+            const x =  Math.floor(e.offsetX / this.view.cellSize)
+            const y =  Math.floor((e.offsetY - this.view.panelHeight) / this.view.cellSize)
+            if(y < 0) return
+            this.view.drawFlag(x, y)
+        }
     }
 }
 
