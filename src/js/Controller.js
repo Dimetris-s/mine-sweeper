@@ -1,28 +1,20 @@
 import Game from "./Game"
 import Gamebar from "./Gamebar"
 import View from "./View"
+import Popup from "./Popup"
+import { checkObjectClick } from "./utils"
 
 export default class Controller {
     constructor(element) {
         this.rootElement = element
         
+        this.popup = new Popup()
         this.gamebar = new Gamebar(this.rootElement)
-        this.game = new Game(2)
-        this.view = new View(this.rootElement, {
-            rows: this.game.rows,
-            columns: this.game.columns,
-            state: this.game.getState(),
-            cellSize: 32
-        })
 
-        this.intervalId = null
-        this.timerId = null
-        this.isPlaying = true
-        this.gameStarted = false
-
-        this.view.canv.addEventListener('click', this.clickHandler.bind(this))
-        this.view.canv.addEventListener('contextmenu', this.contextHandler.bind(this))
+        this.init()
+        this.gamebar.init(this.restartGame.bind(this))
     }
+
 
     update() {
         const state = this.game.getState()
@@ -36,18 +28,27 @@ export default class Controller {
     }
     restartGame() {
         this.stopTimer()
+        this.view.desrtoyCanv()
         this.init()
         this.update()
         this.view.setDefaultSmile()
     }
 
     init() {
-        this.game = new Game(2)
+        this.game = new Game(this.gamebar.difficult)
+        this.view = new View(this.rootElement, {
+            rows: this.game.rows,
+            columns: this.game.columns,
+            state: this.game.getState()
+        })
 
         this.intervalId = null
         this.timerId = null
         this.isPlaying = true
         this.gameStarted = false
+
+        this.view.canv.addEventListener('click', this.clickHandler.bind(this))
+        this.view.canv.addEventListener('contextmenu', this.contextHandler.bind(this))
     }
         
     startGame(x,y) {
@@ -81,12 +82,7 @@ export default class Controller {
     }
 
     clickHandler(e)  {
-        if(
-            (e.offsetX >= this.view.smileImgX && e.offsetX <= this.view.smileImgX + this.view.smileImgSize) &&
-            (e.offsetY >= this.view.smileImgY && e.offsetY <= this.view.smileImgY + this.view.smileImgSize) 
-          ) {
-              this.restartGame()
-          }
+        if(checkObjectClick(e, this.view.smileImgX, this.view.smileImgY, this.view.smileImgSize, this.view.smileImgSize)) this.restartGame()
         if(this.isPlaying) {
             const x =  Math.floor(e.offsetX / this.view.cellSize)
             const y =  Math.floor((e.offsetY - this.view.panelHeight) / this.view.cellSize)
@@ -109,15 +105,3 @@ export default class Controller {
         }
     }
 }
-
-
-
-
-
-
-        // this.canv.addEventListener('mousemove', event => {
-        //     const x = Math.floor((event.offsetX + 1) / this.cellSize)
-        //     const y = Math.floor((event.offsetY + 1) / this.cellSize)
-        //     this.renderCells(this.state)
-        //     this.renderCell(this.cellSize * x, this.cellSize * y, this.cellSize, this.cellSize, this.state.playfield[y][x], true, View.colors[this.state.playfield[y][x]])
-        // })

@@ -4,10 +4,15 @@ export default class Gamebar {
     constructor(element) {
         this.element = element
         this.gamebar = this.createGamebar()
-        this.btns = null
+        this.difficult = 1
         this.popup = new Popup()
-        
-        this.init()
+
+
+        this.popup.init(this.popupCb)
+    }
+
+    popupCb() {
+        this.difficult = this.popup.formData
     }
 
     createGamebar() {
@@ -15,31 +20,38 @@ export default class Gamebar {
         gamebar.classList.add('gamebar')
 
         gamebar.insertAdjacentHTML('afterbegin', `
-                <button data-difficult="new" class="btn active">Новичок</button>
-                <button data-difficult="mid" class="btn">Любитель</button>
-                <button data-difficult="pro" class="btn">Профессионал</button>
-                <button data-difficult="custom" class="btn">Особый</button>
+                <button data-difficult="1" class="btn active">Новичок</button>
+                <button data-difficult="2" class="btn">Любитель</button>
+                <button data-difficult="3" class="btn">Профессионал</button>
         `)
 
         return gamebar
     }
 
-    init() {
-        this.element.append(this.gamebar)
-        this.btns = this.gamebar.querySelectorAll('.btn')
-        this.btns.forEach(btn => btn.addEventListener('click', this.listener))
+    clearActiveClass() {
+        [...this.gamebar.children].forEach(child => child.classList.remove('active'))
     }
 
-    listener = (e) => {
-        this.btns.forEach(btn => btn.classList.remove('active'))
-        e.target.classList.add('active')
-        if(e.target.dataset.difficult === 'custom') {
-            this.popup.open()
-        }
-    } 
+    init(callback) {
+        this.element.append(this.gamebar)
+        this.gamebar.addEventListener('click', event => {
+            if(event.target.dataset.difficult === 'custom') {
+                this.popup.open()
+            } else if(event.target.classList.contains('btn')) {
+                this.clearActiveClass()
+                event.target.classList.add('active')
+                this.difficult = +event.target.dataset.difficult
+                callback()
+            }
+        })
+    }
+
+
 
     destroy() {
-        this.btns.forEach(btn => btn.removeEventListener('click', this.listener))
         this.gamebar.remove()
     }
 }
+
+
+{/* <button data-difficult="custom" class="btn">Особый</button> */}

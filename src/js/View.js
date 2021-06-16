@@ -20,12 +20,14 @@ export default class View {
         '8': 'brown',
     }
 
+    static cellSize = 32
+
     constructor(element, options) {
         this.element = element
         this.state = options.state
         this.rows = options.rows
         this.columns = options.columns
-        this.cellSize = options.cellSize
+        this.cellSize = View.cellSize
 
         this.panelHeight = this.cellSize * 3
 
@@ -71,6 +73,13 @@ export default class View {
         this.render(this.state)
 
     }
+
+    render(state) {
+        this.clearCanv()
+        this.renderPanel(state)
+        this.renderCells(state)
+    }
+
 
     clearCanv() {
         this.ctx.fillStyle = 'white'
@@ -192,12 +201,7 @@ export default class View {
         this.ctx.fillText(getDisplayValue(state.time), this.timePanelX + this.minesWidth / 2, this.timePanelY + this.minesHeight / 1.8)
     }
 
-    render(state) {
-        this.clearCanv()
-        this.renderPanel(state)
-        this.renderCells(state)
-    }
-
+    
     renderCells(state) {
         const playfield = state.playfield
         for (let y = 0; y < playfield.length; y++) {
@@ -237,5 +241,9 @@ export default class View {
 
     drawFlag(x, y) {
         this.drawImage(this.flagImg, this.cellSize * x, this.cellSize * y + this.playfieldY, this.cellSize, this.cellSize)
+    }
+
+    desrtoyCanv() {
+        this.canv.remove()
     }
 } 

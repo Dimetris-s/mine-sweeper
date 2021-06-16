@@ -1,22 +1,20 @@
 export default class Popup {
     constructor() {
-        this.popup = document.createElement('div')
-        this.popupForm = null
+        this.popup = this.createPopup()
+        this.popupForm = this.popup.querySelector('.form')
 
-
-        this.init()
+        this.formData = null
     }
 
-    init() {
-        this.popup.classList.add('popup')
-        this.createPopup()
-        this.popup.addEventListener('click', this.listener)
-        document.body.append(this.popup)
-        this.popupForm = this.popup.querySelector('.form')
+    init(callback) {
         this.popupForm.addEventListener('submit', this.submitHandler)
+        this.popup.addEventListener('click', event => {this.listener(event, callback)})
+        document.body.append(this.popup)
     }
     createPopup() {
-        this.popup.insertAdjacentHTML('afterbegin', 
+        const popup = document.createElement('div')
+        popup.classList.add('popup')
+        popup.insertAdjacentHTML('afterbegin', 
         `   <div class="popup__backdrop"></div>
             <div class="popup__body">
                 <span class="popup__close">&times;</span>
@@ -34,11 +32,13 @@ export default class Popup {
                         <input type="number" max="999" min="1" value="10" name="mines" id="mines" class="popup__input">
                     </div>
                     <div class="form__actions">
-                        <button  class="btn--ok btn form__btn">OK</button>
+                        <button type="submit" class="btn--ok btn form__btn">OK</button>
                     </div>
                 </form>
             </div>
         `)
+
+        return popup
     }
 
     close() {
@@ -54,12 +54,23 @@ export default class Popup {
         this.popup.remove()
     }
 
-    listener = e => {
-        if(e.target.classList.contains('popup__close') || e.target.classList.contains('popup__backdrop')) this.close()
+    listener(e, callback) {
+        if(e.target.classList.contains('popup__close') || e.target.classList.contains('popup__backdrop')) {
+            this.close()
+            console.log('closed');
+        } else if(e.target.classList.contains('form__btn')) {
+            const {columns, rows, mines} = this.popupForm
+            this.formData = {
+                columns: columns.value,
+                rows: rows.value,
+                mines: mines.value,
+            }
+            this.close()
+            callback()
+        }
     }
 
     submitHandler = e => {
         e.preventDefault()
-        this.close()
     }
 }

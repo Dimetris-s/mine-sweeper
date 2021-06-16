@@ -15,3 +15,14 @@ export function getDisplayValue(num) {
             return `${sign}${number}`
     }
 }
+
+export function checkObjectClick(event, objX, objY, objW, objH) {
+    if(
+        (event.offsetX >= objX && event.offsetX <= objX + objW) &&
+        (event.offsetY >= objY && event.offsetY <= objY + objH) 
+      ) {
+          return true
+      }
+
+      return false
+}

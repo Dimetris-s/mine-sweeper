@@ -109,6 +109,7 @@ export default class Game {
             
         
     }
+    
     toggleFlag(y,x) {
         if(this.playfield[y][x].opened) return
 
